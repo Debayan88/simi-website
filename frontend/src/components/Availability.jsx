@@ -3,17 +3,15 @@ import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import dayjs from "dayjs";
 import api from "../lib/api";
-
-const ROOM_TABS = [
-  { id: "verandah-suite", label: "Verandah Suite" },
-  { id: "family-clay-room", label: "Family Clay Haven" },
-  { id: "double-brick-room", label: "Terracotta Double" },
-];
+import { useLang } from "../i18n";
 
 export const Availability = () => {
   const [month, setMonth] = useState(dayjs().format("YYYY-MM"));
   const [roomId, setRoomId] = useState("verandah-suite");
   const [booked, setBooked] = useState({});
+  const { t } = useLang();
+  const tabs = t("availability.tabs");
+  const ROOM_TABS = Object.keys(tabs).map((id) => ({ id, label: tabs[id] }));
 
   const load = useCallback(() => {
     api.get(`/availability?month=${month}`).then((r) => setBooked(r.data.booked)).catch(() => {});
@@ -53,9 +51,9 @@ export const Availability = () => {
           transition={{ duration: 0.9 }}
           className="text-center mb-12"
         >
-          <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-terra mb-4">Availability</p>
+          <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-terra mb-4">{t("availability.kicker")}</p>
           <h2 className="font-serif text-4xl sm:text-5xl font-medium tracking-tight text-earth">
-            Find your <em className="italic text-terra">free</em> dates.
+            {t("availability.h2a")}<em className="italic text-terra">{t("availability.h2em")}</em>{t("availability.h2b")}
           </h2>
         </motion.div>
 
@@ -107,7 +105,7 @@ export const Availability = () => {
           </div>
 
           <div className="grid grid-cols-7 gap-1.5 sm:gap-2 font-mono text-[10px] uppercase tracking-wider text-earth-muted text-center mb-2">
-            {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => <span key={d}>{d}</span>)}
+            {t("availability.days").map((d, i) => <span key={i}>{d}</span>)}
           </div>
           <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
             {cells.map((dateStr, i) => {
@@ -136,13 +134,13 @@ export const Availability = () => {
 
           <div className="mt-8 flex flex-wrap gap-6 justify-center font-mono text-[11px] uppercase tracking-wider text-earth-muted">
             <span className="flex items-center gap-2">
-              <span className="w-3.5 h-3.5 rounded bg-limewash border border-sand-dark inline-block" /> Available
+              <span className="w-3.5 h-3.5 rounded bg-limewash border border-sand-dark inline-block" /> {t("availability.available")}
             </span>
             <span className="flex items-center gap-2">
-              <span className="w-3.5 h-3.5 rounded bg-terra inline-block" /> Booked
+              <span className="w-3.5 h-3.5 rounded bg-terra inline-block" /> {t("availability.booked")}
             </span>
             <span className="flex items-center gap-2">
-              <span className="w-3.5 h-3.5 rounded bg-limewash border border-sand-dark ring-2 ring-terra inline-block" /> Today
+              <span className="w-3.5 h-3.5 rounded bg-limewash border border-sand-dark ring-2 ring-terra inline-block" /> {t("availability.today")}
             </span>
           </div>
         </motion.div>

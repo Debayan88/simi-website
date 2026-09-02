@@ -3,11 +3,13 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import useLenis from "@/hooks/useLenis";
 import { AuthProvider } from "@/context/AuthContext";
+import { LanguageProvider } from "@/i18n";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { Marquee } from "@/components/Marquee";
 import { Manifesto } from "@/components/Manifesto";
 import { Rooms } from "@/components/Rooms";
+import { Reviews } from "@/components/Reviews";
 import { Availability } from "@/components/Availability";
 import { BookingTabs } from "@/components/BookingTabs";
 import { Contact } from "@/components/Contact";
@@ -23,6 +25,7 @@ const Home = () => {
         <Marquee />
         <Manifesto />
         <Rooms />
+        <Reviews />
         <Availability />
         <BookingTabs />
         <Contact />
@@ -35,14 +38,16 @@ function App() {
   return (
     <div className="App">
       <Toaster position="top-center" toastOptions={{ style: { background: "#FCF9F2", border: "1px solid #E6D7C3", color: "#231F1D" } }} />
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/admin" element={<Admin />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/admin" element={<Admin />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </LanguageProvider>
     </div>
   );
 }

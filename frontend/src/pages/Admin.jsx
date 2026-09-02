@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { LogOut, Check, X, RotateCcw, Phone, Mail } from "lucide-react";
+import { LogOut, Check, X, RotateCcw, Phone, Mail, Lock } from "lucide-react";
 import dayjs from "dayjs";
 import { toast } from "sonner";
 import api from "../lib/api";
@@ -107,6 +107,8 @@ const Dashboard = () => {
   const [bookings, setBookings] = useState([]);
   const [enquiries, setEnquiries] = useState([]);
   const [rooms, setRooms] = useState([]);
+  const [pw, setPw] = useState({ current: "", next: "", confirm: "" });
+  const [pwBusy, setPwBusy] = useState(false);
 
   const load = useCallback(() => {
     api.get("/bookings").then((r) => setBookings(r.data.bookings)).catch(() => {});
@@ -129,6 +131,24 @@ const Dashboard = () => {
   const logout = async () => {
     try { await api.post("/auth/logout"); } catch (e) { /* ignore */ }
     setUser(false);
+  };
+
+  const submitPassword = async (e) => {
+    e.preventDefault();
+    if (pw.next !== pw.confirm) {
+      toast.error("New passwords do not match");
+      return;
+    }
+    setPwBusy(true);
+    try {
+      await api.post("/auth/change-password", { current_password: pw.current, new_password: pw.next });
+      toast.success("Password updated — use it next time you sign in");
+      setPw({ current: "", next: "", confirm: "" });
+    } catch (err) {
+      toast.error(formatApiErrorDetail(err.response?.data?.detail));
+    } finally {
+      setPwBusy(false);
+    }
   };
 
   const pendingCount = bookings.filter((b) => b.status === "pending").length;
@@ -188,6 +208,32 @@ const Dashboard = () => {
             ))}
           </div>
         )}
+
+        <div className="mt-12 border-t border-sand-dark pt-10">
+          <div className="bg-white border border-sand-dark rounded-[24px] p-6 sm:p-8 max-w-md" data-testid="settings-card">
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-terra flex items-center gap-2">
+              <Lock className="w-3.5 h-3.5" /> Settings
+            </p>
+            <h3 className="font-serif text-2xl text-earth font-semibold mt-2">Change password</h3>
+            <form onSubmit={submitPassword} className="mt-5 space-y-4">
+              <div>
+                <label className="block font-mono text-[10px] uppercase tracking-[0.2em] text-earth-muted mb-2" htmlFor="settings-current">Current password</label>
+                <input id="settings-current" data-testid="settings-current-password" type="password" required value={pw.current} onChange={(e) => setPw((s) => ({ ...s, current: e.target.value }))} className={inputCls} placeholder="••••••••" />
+              </div>
+              <div>
+                <label className="block font-mono text-[10px] uppercase tracking-[0.2em] text-earth-muted mb-2" htmlFor="settings-new">New password (min 8 characters)</label>
+                <input id="settings-new" data-testid="settings-new-password" type="password" required minLength={8} value={pw.next} onChange={(e) => setPw((s) => ({ ...s, next: e.target.value }))} className={inputCls} placeholder="••••••••" />
+              </div>
+              <div>
+                <label className="block font-mono text-[10px] uppercase tracking-[0.2em] text-earth-muted mb-2" htmlFor="settings-confirm">Repeat new password</label>
+                <input id="settings-confirm" data-testid="settings-confirm-password" type="password" required minLength={8} value={pw.confirm} onChange={(e) => setPw((s) => ({ ...s, confirm: e.target.value }))} className={inputCls} placeholder="••••••••" />
+              </div>
+              <button type="submit" data-testid="btn-change-password" disabled={pwBusy} className="w-full rounded-full bg-terra text-limewash py-3 text-sm font-medium hover:bg-terra-deep active:scale-[0.98] transition-all disabled:opacity-60">
+                {pwBusy ? "Updating…" : "Update password"}
+              </button>
+            </form>
+          </div>
+        </div>
       </main>
     </div>
   );

@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { scrollToId } from "../hooks/useLenis";
 import { DoodleScene } from "./Doodle";
+import { useLang } from "../i18n";
 
 const HERO_IMG = "https://images.unsplash.com/photo-1615976384429-b02ca1cbb8f1?crop=entropy&cs=srgb&fm=jpg&q=85";
 
@@ -21,6 +22,7 @@ const MaskedLine = ({ children, delay }) => (
 
 export const Hero = () => {
   const ref = useRef(null);
+  const { t } = useLang();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const imgY = useTransform(scrollYProgress, [0, 1], [0, 160]);
   const textY = useTransform(scrollYProgress, [0, 1], [0, 80]);
@@ -39,18 +41,18 @@ export const Hero = () => {
             className="font-mono text-[11px] sm:text-xs uppercase tracking-[0.28em] text-terra mb-6"
             data-testid="hero-kicker"
           >
-            Est. 2026 · Kulpi, West Bengal · 20 km from Bakkhali
+            {t("hero.kicker")}
           </motion.p>
 
           <h1
             data-testid="hero-title"
             className="font-serif font-semibold tracking-tight leading-[1.02] text-earth text-5xl sm:text-6xl lg:text-7xl xl:text-[5.4rem]"
           >
-            <MaskedLine delay={0.45}>A house of clay,</MaskedLine>
+            <MaskedLine delay={0.45}>{t("hero.l1")}</MaskedLine>
             <MaskedLine delay={0.58}>
-              light &amp; <em className="italic font-medium text-terra">slow</em>
+              {t("hero.l2a")}<em className="italic font-medium text-terra">{t("hero.l2em")}</em>
             </MaskedLine>
-            <MaskedLine delay={0.71}>mornings.</MaskedLine>
+            <MaskedLine delay={0.71}>{t("hero.l3")}</MaskedLine>
           </h1>
 
           <motion.p
@@ -60,9 +62,7 @@ export const Hero = () => {
             transition={{ duration: 0.9, delay: 1.0 }}
             className="mt-7 max-w-xl text-base sm:text-lg leading-relaxed text-earth-muted"
           >
-            Dhansiri is a two-storey village homestay of raw brick, Mangalore tile and lime
-            wash — open verandahs over the paddy pond, lantern light at dusk, and doodle-art
-            walls that tell the village's story.
+            {t("hero.subtitle")}
           </motion.p>
 
           <motion.div
@@ -76,7 +76,7 @@ export const Hero = () => {
               onClick={() => scrollToId("booking")}
               className="group rounded-full bg-terra text-limewash pl-7 pr-5 py-3.5 text-sm font-medium flex items-center gap-2 hover:bg-terra-deep active:scale-[0.97] transition-all duration-300"
             >
-              Reserve your stay
+              {t("hero.book")}
               <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </button>
             <button
@@ -84,7 +84,7 @@ export const Hero = () => {
               onClick={() => scrollToId("booking")}
               className="rounded-full border border-terra/40 text-terra px-7 py-3.5 text-sm font-medium hover:bg-sand hover:border-terra active:scale-[0.97] transition-all duration-300"
             >
-              Send an enquiry
+              {t("hero.enquire")}
             </button>
           </motion.div>
 
@@ -94,9 +94,9 @@ export const Hero = () => {
             transition={{ duration: 1, delay: 1.4 }}
             className="mt-12 flex gap-10 font-mono text-[11px] uppercase tracking-[0.18em] text-earth-muted"
           >
-            <span><span className="text-terra text-base font-medium">03</span> Rooms</span>
-            <span><span className="text-terra text-base font-medium">02</span> Floors</span>
-            <span><span className="text-terra text-base font-medium">01</span> Pond</span>
+            <span><span className="text-terra text-base font-medium">03</span> {t("hero.stats")[0]}</span>
+            <span><span className="text-terra text-base font-medium">02</span> {t("hero.stats")[1]}</span>
+            <span><span className="text-terra text-base font-medium">01</span> {t("hero.stats")[2]}</span>
           </motion.div>
         </motion.div>
 
@@ -124,8 +124,8 @@ export const Hero = () => {
             transition={{ duration: 0.9, delay: 1.3 }}
             className="absolute -bottom-5 -left-5 sm:-left-8 bg-limewash/90 backdrop-blur-xl border border-sand-dark rounded-2xl px-5 py-4 shadow-lg"
           >
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-terra">Now hosting</p>
-            <p className="font-serif text-lg text-earth mt-1">Monsoon season stays</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-terra">{t("hero.hosting")}</p>
+            <p className="font-serif text-lg text-earth mt-1">{t("hero.hostingSub")}</p>
           </motion.div>
         </div>
       </div>

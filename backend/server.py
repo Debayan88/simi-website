@@ -101,8 +101,6 @@ async def seed_admin():
         await db.users.insert_one({"email": admin_email, "password_hash": hash_password(admin_password),
                                    "name": "Owner", "role": "admin",
                                    "created_at": datetime.now(timezone.utc).isoformat()})
-    elif not verify_password(admin_password, existing["password_hash"]):
-        await db.users.update_one({"email": admin_email}, {"$set": {"password_hash": hash_password(admin_password)}})
 
 ROOMS = [
     {
@@ -506,6 +504,60 @@ async def refresh_session(request: Request, response: Response):
     return {"status": "success"}
 
 
+class ChangePasswordInput(BaseModel):
+    current_password: str
+    new_password: str = Field(min_length=8, max_length=128)
+
+
+@api_router.post("/auth/change-password")
+async def change_password(input: ChangePasswordInput, user=Depends(get_current_user)):
+    doc = await db.users.find_one({"_id": ObjectId(user["_id"])})
+    if not doc or not verify_password(input.current_password, doc["password_hash"]):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    if input.new_password == input.current_password:
+        raise HTTPException(status_code=400, detail="New password must be different")
+    await db.users.update_one({"_id": doc["_id"]}, {"$set": {"password_hash": hash_password(input.new_password)}})
+    return {"status": "success"}
+
+
+SAMPLE_REVIEWS = [
+    {
+        "name": "Anindita & Rahul", "place": "Kolkata", "stars": 5,
+        "text_en": "We woke to mist over the pond and the smell of rice on the clay stove. The verandah swing alone is worth the drive from Kolkata.",
+        "text_bn": "পুকুরের উপর কুয়াশা আর মাটির চুলায় ভাতের গন্ধে ঘুম ভাঙল। কলকাতা থেকে শুধু বারান্দার দোলনার জন্যই আসা যায়।",
+    },
+    {
+        "name": "Meera Dasgupta", "place": "New Delhi", "stars": 5,
+        "text_en": "Raw brick, lantern light, and the quietest nights I have slept in years. The fish curry in a clay pot is unreal.",
+        "text_bn": "কাঁচা ইট, হারিকেনের আলো, আর বহু বছরের মধ্যে সবচেয়ে শান্ত রাতের ঘুম। মাটির হাঁড়িতে মাছের ঝোল অসাধারণ।",
+    },
+    {
+        "name": "The Banerjee Family", "place": "Bakkhali", "stars": 5,
+        "text_en": "Twenty minutes from Bakkhali and a world away. The kids watched egrets in the paddy while we did absolutely nothing. Perfect.",
+        "text_bn": "বাকখালি থেকে মিনিট কুড়ি, অথচ একেবারে অন্য জগৎ। বাচ্চারা ধানক্ষেতে বক দেখল, আমরা একদম কিছুই করলাম না। দারুণ।",
+    },
+    {
+        "name": "Arjun Mehta", "place": "Mumbai", "stars": 5,
+        "text_en": "Booked over WhatsApp in two minutes. The doodle walls, the jaali light, the pond at dusk — my camera roll is full.",
+        "text_bn": "WhatsApp-এ দুই মিনিটে বুকিং। দেয়ালের আঁকিবুঁকি, জালির আলো, সন্ধ্যায় পুকুর — আমার ক্যামেরা রোল ভরে গেছে।",
+    },
+]
+
+
+async def seed_reviews():
+    if await db.reviews.count_documents({}) == 0:
+        now = datetime.now(timezone.utc).isoformat()
+        await db.reviews.insert_many(
+            [{**r, "id": str(uuid.uuid4()), "created_at": now} for r in SAMPLE_REVIEWS]
+        )
+
+
+@api_router.get("/reviews")
+async def list_reviews():
+    items = await db.reviews.find({}, {"_id": 0}).to_list(50)
+    return {"reviews": items}
+
+
 app.include_router(api_router)
 
 app.add_middleware(
@@ -527,6 +579,7 @@ async def startup():
     await db.users.create_index("email", unique=True)
     await db.login_attempts.create_index("identifier")
     await seed_admin()
+    await seed_reviews()
 
 
 @app.on_event("shutdown")

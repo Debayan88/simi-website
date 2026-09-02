@@ -29,7 +29,11 @@ User provided a concept board (Village Homestay — Terracotta & Sand, two-store
 - Booking form with live nights/total calculator; enquiry form; both persist + trigger emails
 - Verified: curl for all endpoints incl. double-booking rejection; UI booking submitted → toast → calendar blocks dates instantly; email proxy returned 202 Accepted (guest confirmations to resend test address)
 
-## Implemented (2026-09-02, v2 — all four backlog P0/P1 items done)
+## Implemented (2026-09-02, v3)
+- Bengali/English toggle in navbar (full landing page i18n incl. hero, manifesto, rooms, availability, booking/enquiry forms, reviews, contact; choice persisted in localStorage). Admin dashboard stays English.
+- Guest reviews wall under rooms: GET /api/reviews, 4 seeded sample reviews (bilingual text, stars) — flagged on-page as samples until real guests leave words.
+- Owner change-password: POST /api/auth/change-password (auth + current-password check + bcrypt) with Settings card in /admin dashboard. Admin seed now only creates the account when missing — restarts never overwrite an owner-changed password.
+- (v2) Rebrand to Dhansiri, owner email alerts, WhatsApp prefilled booking, owner dashboard with confirm/cancel.
 - Rebranded to Dhansiri Homestay, Kulpi, West Bengal (20 km from Bakkhali); real phone/WhatsApp +91 99036 90119 and owner email simitaroy69@gmail.com across site and emails
 - Owner email alerts: OWNER_EMAIL + EMAIL_REPLY_TO set — every booking/enquiry emails the owner (verified 202 Accepted); guests get confirmation emails
 - WhatsApp booking: "Book via WhatsApp" button in booking summary opens wa.me/919903690119 with room/dates/guests/total prefilled

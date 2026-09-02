@@ -1,22 +1,25 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { Languages } from "lucide-react";
 import { scrollToId } from "../hooks/useLenis";
-
-const LINKS = [
-  { id: "manifesto", label: "Manifesto", testid: "nav-link-manifesto" },
-  { id: "rooms", label: "Rooms", testid: "nav-link-rooms" },
-  { id: "availability", label: "Availability", testid: "nav-link-availability" },
-  { id: "booking", label: "Booking", testid: "nav-link-booking" },
-  { id: "contact", label: "Contact", testid: "nav-link-contact" },
-];
+import { useLang } from "../i18n";
 
 export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
+  const { lang, setLang, t } = useLang();
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const LINKS = [
+    { id: "manifesto", label: t("nav.manifesto"), testid: "nav-link-manifesto" },
+    { id: "rooms", label: t("nav.rooms"), testid: "nav-link-rooms" },
+    { id: "availability", label: t("nav.availability"), testid: "nav-link-availability" },
+    { id: "booking", label: t("nav.booking"), testid: "nav-link-booking" },
+    { id: "contact", label: t("nav.contact"), testid: "nav-link-contact" },
+  ];
 
   return (
     <motion.header
@@ -51,13 +54,24 @@ export const Navbar = () => {
             </button>
           ))}
         </nav>
-        <button
-          data-testid="nav-btn-reserve-now"
-          onClick={() => scrollToId("booking")}
-          className="rounded-full bg-terra text-limewash px-5 py-2.5 text-sm font-medium hover:bg-terra-deep active:scale-[0.97] transition-all duration-300"
-        >
-          Reserve Stay
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            data-testid="lang-toggle"
+            onClick={() => setLang(lang === "en" ? "bn" : "en")}
+            className="flex items-center gap-1.5 rounded-full border border-terra/40 text-terra px-4 py-2 text-xs font-medium hover:bg-sand hover:border-terra active:scale-[0.97] transition-all duration-300"
+            aria-label="Toggle language"
+          >
+            <Languages className="w-3.5 h-3.5" />
+            {lang === "en" ? "বাংলা" : "EN"}
+          </button>
+          <button
+            data-testid="nav-btn-reserve-now"
+            onClick={() => scrollToId("booking")}
+            className="rounded-full bg-terra text-limewash px-5 py-2.5 text-sm font-medium hover:bg-terra-deep active:scale-[0.97] transition-all duration-300"
+          >
+            {t("nav.reserve")}
+          </button>
+        </div>
       </div>
     </motion.header>
   );
