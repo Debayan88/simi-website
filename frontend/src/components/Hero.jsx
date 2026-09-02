@@ -39,7 +39,7 @@ export const Hero = () => {
             className="font-mono text-[11px] sm:text-xs uppercase tracking-[0.28em] text-terra mb-6"
             data-testid="hero-kicker"
           >
-            Est. 2026 · A riverside village · Terracotta &amp; Sand
+            Est. 2026 · Kulpi, West Bengal · 20 km from Bakkhali
           </motion.p>
 
           <h1
@@ -60,8 +60,8 @@ export const Hero = () => {
             transition={{ duration: 0.9, delay: 1.0 }}
             className="mt-7 max-w-xl text-base sm:text-lg leading-relaxed text-earth-muted"
           >
-            A two-storey village homestay of raw brick, Mangalore tile and lime wash —
-            open verandahs over the paddy pond, lantern light at dusk, and doodle-art
+            Dhansiri is a two-storey village homestay of raw brick, Mangalore tile and lime
+            wash — open verandahs over the paddy pond, lantern light at dusk, and doodle-art
             walls that tell the village's story.
           </motion.p>
 

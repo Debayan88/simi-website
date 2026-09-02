@@ -29,12 +29,17 @@ User provided a concept board (Village Homestay — Terracotta & Sand, two-store
 - Booking form with live nights/total calculator; enquiry form; both persist + trigger emails
 - Verified: curl for all endpoints incl. double-booking rejection; UI booking submitted → toast → calendar blocks dates instantly; email proxy returned 202 Accepted (guest confirmations to resend test address)
 
+## Implemented (2026-09-02, v2 — all four backlog P0/P1 items done)
+- Rebranded to Dhansiri Homestay, Kulpi, West Bengal (20 km from Bakkhali); real phone/WhatsApp +91 99036 90119 and owner email simitaroy69@gmail.com across site and emails
+- Owner email alerts: OWNER_EMAIL + EMAIL_REPLY_TO set — every booking/enquiry emails the owner (verified 202 Accepted); guests get confirmation emails
+- WhatsApp booking: "Book via WhatsApp" button in booking summary opens wa.me/919903690119 with room/dates/guests/total prefilled
+- Owner dashboard at /admin: JWT cookie auth (login/logout/me/refresh, bcrypt, 5-attempt lockout), stats, bookings + enquiries tabs, Confirm / Cancel / Restore with clash guard and automatic guest emails; GET /bookings + /api/enquiries now owner-only; cancelled bookings free their calendar dates
+- Admin creds: simitaroy69@gmail.com / 7F1xQurt7HtoeR! (also in test_credentials.md)
+
 ## Backlog
-- P0: Set OWNER_EMAIL in backend/.env with user's real email (ask user!) so owner gets notifications
-- P0: Swap real homestay name/location + real contact details (currently placeholders)
-- P1: Owner admin page with login to confirm/cancel bookings (pending → confirmed), protected GET /bookings
-- P1: Replace stock photos with real photos of the finished house
-- P2: WhatsApp deep-link booking, multi-room cart, seasonal pricing, i18n
+- P1: Replace stock photos with real photos of the finished house (user to attach)
+- P2: Seasonal pricing, whole-house booking option, multi-language (Bengali), guest reviews section
+- P2: Password reset flow UI (endpoint pattern documented in /app/auth_testing.md)
 
 ## Test data note
-Demo bookings exist: verandah-suite Jul 20–22 2026 and Sep 10–12 2026 (both test submissions). Clear from `bookings` collection when going live.
+Demo bookings: Sep 10–13 verandah-suite (confirmed), Oct 5–7 double-brick-room (pending), Jul 20–23 verandah-suite (cancelled). One test enquiry. Clear from DB when going live.

@@ -3,9 +3,9 @@ import { Phone, MessageCircle, Mail } from "lucide-react";
 import { DoodleLantern } from "./Doodle";
 
 const CARDS = [
-  { icon: Phone, label: "Call us", value: "+91 98765 43210", href: "tel:+919876543210", testid: "contact-strip-phone" },
-  { icon: MessageCircle, label: "WhatsApp", value: "+91 98765 43210", href: "https://wa.me/919876543210", testid: "contact-strip-whatsapp" },
-  { icon: Mail, label: "Write to us", value: "hello@villagehomestay.in", href: "mailto:hello@villagehomestay.in", testid: "contact-strip-email" },
+  { icon: Phone, label: "Call us", value: "+91 99036 90119", href: "tel:+919903690119", testid: "contact-strip-phone" },
+  { icon: MessageCircle, label: "WhatsApp", value: "+91 99036 90119", href: "https://wa.me/919903690119", testid: "contact-strip-whatsapp" },
+  { icon: Mail, label: "Write to us", value: "simitaroy69@gmail.com", href: "mailto:simitaroy69@gmail.com", testid: "contact-strip-email" },
 ];
 
 export const Contact = () => (
@@ -46,10 +46,10 @@ export const Contact = () => (
 
       <footer className="mt-24 border-t border-sand-dark pt-10 flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="font-serif text-lg text-earth">
-          Village <span className="italic text-terra">Homestay</span>
+          Dhansiri <span className="italic text-terra">homestay</span>
         </p>
         <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-earth-muted" data-testid="footer-coordinates">
-          Terracotta &amp; Sand · 12.87° N, 74.88° E
+          Kulpi, West Bengal · 22.08° N, 88.24° E
         </p>
       </footer>
     </div>

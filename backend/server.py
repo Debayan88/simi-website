@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depends
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -7,10 +7,14 @@ import re
 import uuid
 import logging
 import ipaddress
+import secrets
 import httpx
+import bcrypt
+import jwt
+from bson import ObjectId
 from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Literal
 from datetime import datetime, timezone, date, timedelta
 from html import escape
 from html.parser import HTMLParser
@@ -34,6 +38,71 @@ EMAIL_KEY = os.environ["EMERGENT_EMAIL_KEY"]
 EMAIL_FROM_NAME = os.environ["EMAIL_FROM_NAME"]
 EMAIL_REPLY_TO = os.environ.get("EMAIL_REPLY_TO")
 OWNER_EMAIL = os.environ.get("OWNER_EMAIL")
+
+JWT_ALGORITHM = "HS256"
+
+
+def get_jwt_secret() -> str:
+    return os.environ["JWT_SECRET"]
+
+
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+
+def verify_password(plain: str, hashed: str) -> bool:
+    return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
+
+
+def create_access_token(user_id: str, email: str) -> str:
+    payload = {"sub": user_id, "email": email, "exp": datetime.now(timezone.utc) + timedelta(minutes=15), "type": "access"}
+    return jwt.encode(payload, get_jwt_secret(), algorithm=JWT_ALGORITHM)
+
+
+def create_refresh_token(user_id: str) -> str:
+    payload = {"sub": user_id, "exp": datetime.now(timezone.utc) + timedelta(days=7), "type": "refresh"}
+    return jwt.encode(payload, get_jwt_secret(), algorithm=JWT_ALGORITHM)
+
+
+def set_auth_cookies(response: Response, user_id: str, email: str):
+    response.set_cookie(key="access_token", value=create_access_token(user_id, email), httponly=True, secure=True, samesite="none", max_age=900, path="/")
+    response.set_cookie(key="refresh_token", value=create_refresh_token(user_id), httponly=True, secure=True, samesite="none", max_age=604800, path="/")
+
+
+async def get_current_user(request: Request) -> dict:
+    token = request.cookies.get("access_token")
+    if not token:
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            token = auth_header[7:]
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    try:
+        payload = jwt.decode(token, get_jwt_secret(), algorithms=[JWT_ALGORITHM])
+        if payload.get("type") != "access":
+            raise HTTPException(status_code=401, detail="Invalid token type")
+        user = await db.users.find_one({"_id": ObjectId(payload["sub"])})
+        if not user:
+            raise HTTPException(status_code=401, detail="User not found")
+        user["_id"] = str(user["_id"])
+        user.pop("password_hash", None)
+        return user
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+
+async def seed_admin():
+    admin_email = os.environ["ADMIN_EMAIL"].lower()
+    admin_password = os.environ["ADMIN_PASSWORD"]
+    existing = await db.users.find_one({"email": admin_email})
+    if existing is None:
+        await db.users.insert_one({"email": admin_email, "password_hash": hash_password(admin_password),
+                                   "name": "Owner", "role": "admin",
+                                   "created_at": datetime.now(timezone.utc).isoformat()})
+    elif not verify_password(admin_password, existing["password_hash"]):
+        await db.users.update_one({"email": admin_email}, {"$set": {"password_hash": hash_password(admin_password)}})
 
 ROOMS = [
     {
@@ -207,7 +276,8 @@ async def get_availability(month: str):
     next_month = date(first.year + 1, 1, 1) if first.month == 12 else date(first.year, first.month + 1, 1)
     last = next_month - timedelta(days=1)
     cursor = db.bookings.find(
-        {"check_in": {"$lte": last.isoformat()}, "check_out": {"$gt": first.isoformat()}},
+        {"status": {"$ne": "cancelled"},
+         "check_in": {"$lte": last.isoformat()}, "check_out": {"$gt": first.isoformat()}},
         {"_id": 0, "room_id": 1, "check_in": 1, "check_out": 1},
     )
     booked: Dict[str, List[str]] = {}
@@ -250,7 +320,8 @@ async def create_booking(input: BookingCreate):
     if input.guests > room["capacity"]:
         raise HTTPException(status_code=400, detail=f"{room['name']} sleeps up to {room['capacity']} guests")
     clash = await db.bookings.find_one(
-        {"room_id": input.room_id, "check_in": {"$lt": input.check_out.isoformat()},
+        {"room_id": input.room_id, "status": {"$ne": "cancelled"},
+         "check_in": {"$lt": input.check_out.isoformat()},
          "check_out": {"$gt": input.check_in.isoformat()}},
         {"_id": 0},
     )
@@ -325,15 +396,114 @@ async def create_enquiry(input: EnquiryCreate):
 
 
 @api_router.get("/bookings")
-async def list_bookings():
+async def list_bookings(user=Depends(get_current_user)):
     items = await db.bookings.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
     return {"bookings": items}
 
 
 @api_router.get("/enquiries")
-async def list_enquiries():
+async def list_enquiries(user=Depends(get_current_user)):
     items = await db.enquiries.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
     return {"enquiries": items}
+
+
+class StatusUpdate(BaseModel):
+    status: Literal["pending", "confirmed", "cancelled"]
+
+
+@api_router.patch("/bookings/{booking_id}/status")
+async def update_booking_status(booking_id: str, input: StatusUpdate, user=Depends(get_current_user)):
+    booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    if input.status != "cancelled":
+        clash = await db.bookings.find_one(
+            {"id": {"$ne": booking_id}, "room_id": booking["room_id"], "status": {"$ne": "cancelled"},
+             "check_in": {"$lt": booking["check_out"]}, "check_out": {"$gt": booking["check_in"]}},
+            {"_id": 0},
+        )
+        if clash:
+            raise HTTPException(status_code=409, detail="Dates clash with another active booking")
+    await db.bookings.update_one({"id": booking_id}, {"$set": {"status": input.status}})
+    room = next((r for r in ROOMS if r["id"] == booking["room_id"]), {"name": booking["room_id"]})
+    if input.status == "confirmed":
+        html = (
+            '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
+            '<tr><td style="font-family:Georgia,serif">'
+            f'<h2 style="color:#3B5838;margin:0 0 12px">Your stay is confirmed</h2>'
+            f'<p style="font-size:14px;color:#231F1D">Dear {escape(booking["name"])}, we look forward to hosting you at {escape(EMAIL_FROM_NAME)}.</p>'
+            f'<table>{_booking_email_rows(booking, room)}</table>'
+            f'<p style="font-size:12px;color:#888;margin-top:16px">Sent by {escape(EMAIL_FROM_NAME)}.</p>'
+            '</td></tr></table>'
+        )
+        await _try_send(to=booking["email"], subject=f"Your {EMAIL_FROM_NAME} stay is confirmed", html=html)
+    elif input.status == "cancelled":
+        html = (
+            '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
+            '<tr><td style="font-family:Georgia,serif">'
+            f'<h2 style="color:#8C3218;margin:0 0 12px">Your booking was cancelled</h2>'
+            f'<p style="font-size:14px;color:#231F1D">Dear {escape(booking["name"])}, your booking for {escape(room["name"])} '
+            f'({escape(booking["check_in"])} to {escape(booking["check_out"])}) has been cancelled. The dates are free again.</p>'
+            f'<p style="font-size:12px;color:#888;margin-top:16px">Sent by {escape(EMAIL_FROM_NAME)}.</p>'
+            '</td></tr></table>'
+        )
+        await _try_send(to=booking["email"], subject=f"Your {EMAIL_FROM_NAME} booking was cancelled", html=html)
+    return {"status": "success", "booking_id": booking_id, "new_status": input.status}
+
+
+class LoginInput(BaseModel):
+    email: EmailStr
+    password: str
+
+
+@api_router.post("/auth/login")
+async def login(input: LoginInput, request: Request, response: Response):
+    email = input.email.lower()
+    identifier = f"{request.client.host if request.client else 'unknown'}:{email}"
+    window_start = (datetime.now(timezone.utc) - timedelta(minutes=15)).isoformat()
+    fails = await db.login_attempts.count_documents({"identifier": identifier, "at": {"$gte": window_start}})
+    if fails >= 5:
+        raise HTTPException(status_code=429, detail="Too many failed attempts. Try again in 15 minutes.")
+    user = await db.users.find_one({"email": email})
+    if not user or not verify_password(input.password, user["password_hash"]):
+        await db.login_attempts.insert_one({"identifier": identifier, "at": datetime.now(timezone.utc).isoformat()})
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    await db.login_attempts.delete_many({"identifier": identifier})
+    set_auth_cookies(response, str(user["_id"]), email)
+    return {"id": str(user["_id"]), "email": email, "name": user.get("name", "Owner"), "role": user.get("role", "admin")}
+
+
+@api_router.post("/auth/logout")
+async def logout(response: Response):
+    response.delete_cookie("access_token", path="/")
+    response.delete_cookie("refresh_token", path="/")
+    return {"status": "success"}
+
+
+@api_router.get("/auth/me")
+async def auth_me(user=Depends(get_current_user)):
+    return {"id": user["_id"], "email": user["email"], "name": user.get("name", "Owner"), "role": user.get("role", "admin")}
+
+
+@api_router.post("/auth/refresh")
+async def refresh_session(request: Request, response: Response):
+    token = request.cookies.get("refresh_token")
+    if not token:
+        raise HTTPException(status_code=401, detail="No refresh token")
+    try:
+        payload = jwt.decode(token, get_jwt_secret(), algorithms=[JWT_ALGORITHM])
+        if payload.get("type") != "refresh":
+            raise HTTPException(status_code=401, detail="Invalid token type")
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Refresh token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    user = await db.users.find_one({"_id": ObjectId(payload["sub"])})
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+    response.set_cookie(key="access_token", value=create_access_token(str(user["_id"]), user["email"]),
+                        httponly=True, secure=True, samesite="none", max_age=900, path="/")
+    return {"status": "success"}
 
 
 app.include_router(api_router)
@@ -341,7 +511,7 @@ app.include_router(api_router)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_origins=[os.environ.get("FRONTEND_URL", "http://localhost:3000"), "http://localhost:3000"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -350,6 +520,13 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
+
+
+@app.on_event("startup")
+async def startup():
+    await db.users.create_index("email", unique=True)
+    await db.login_attempts.create_index("identifier")
+    await seed_admin()
 
 
 @app.on_event("shutdown")

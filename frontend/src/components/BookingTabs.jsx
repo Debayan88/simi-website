@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Minus, Plus, Send, CalendarCheck } from "lucide-react";
+import { Minus, Plus, Send, CalendarCheck, MessageCircle } from "lucide-react";
 import dayjs from "dayjs";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -33,6 +33,12 @@ export const BookingTabs = () => {
   const room = useMemo(() => rooms.find((r) => r.id === bk.room_id), [rooms, bk.room_id]);
   const nights = bk.check_in && bk.check_out ? dayjs(bk.check_out).diff(dayjs(bk.check_in), "day") : 0;
   const total = room && nights > 0 ? nights * room.rate : 0;
+
+  const waLink = useMemo(() => {
+    if (!room || nights <= 0) return null;
+    const msg = `Hello Dhansiri Homestay! I'd like to book the ${room.name}.\nCheck-in: ${bk.check_in}\nCheck-out: ${bk.check_out}\nGuests: ${bk.guests}${bk.name ? `\nName: ${bk.name}` : ""}\nEstimated total: ₹${total.toLocaleString("en-IN")}`;
+    return `https://wa.me/919903690119?text=${encodeURIComponent(msg)}`;
+  }, [room, nights, bk, total]);
 
   const set = (k) => (e) => setBk((s) => ({ ...s, [k]: e.target.value }));
   const setE = (k) => (e) => setEq((s) => ({ ...s, [k]: e.target.value }));
@@ -179,6 +185,21 @@ export const BookingTabs = () => {
                     >
                       <CalendarCheck className="w-4 h-4" /> {sending ? "Sending…" : "Request booking"}
                     </button>
+                    {waLink ? (
+                      <a
+                        href={waLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-testid="btn-whatsapp-booking"
+                        className="mt-3 w-full rounded-full bg-paddy text-limewash py-3.5 text-sm font-medium flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all duration-300"
+                      >
+                        <MessageCircle className="w-4 h-4" /> Book via WhatsApp
+                      </a>
+                    ) : (
+                      <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-wider text-earth-muted" data-testid="whatsapp-hint">
+                        Pick dates to book via WhatsApp
+                      </p>
+                    )}
                   </div>
                 </div>
               </form>

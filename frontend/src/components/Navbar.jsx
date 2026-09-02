@@ -34,9 +34,9 @@ export const Navbar = () => {
           onClick={() => scrollToId("home")}
           className="flex items-center gap-3 group"
         >
-          <span className="w-9 h-9 rounded-t-full bg-terra text-limewash flex items-center justify-center font-serif text-lg italic group-hover:bg-terra-deep transition-colors">V</span>
+          <span className="w-9 h-9 rounded-t-full bg-terra text-limewash flex items-center justify-center font-serif text-lg italic group-hover:bg-terra-deep transition-colors">D</span>
           <span className="font-serif text-xl sm:text-2xl font-semibold tracking-tight text-earth">
-            Village <span className="italic text-terra">Homestay</span>
+            Dhansiri <span className="italic text-terra">homestay</span>
           </span>
         </button>
         <nav className="hidden md:flex items-center gap-7">
