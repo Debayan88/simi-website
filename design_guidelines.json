@@ -1,0 +1,145 @@
+{
+  "project_title": "VILLAGE HOMESTAY — Terracotta & Sand (Award-Worthy Landing Page)",
+  "context": {
+    "type": "marketing_landing_page",
+    "theme": "Organic & Earthy Luxury Village Architectural Homestay",
+    "mood": "Tactile, warm, cinematic, editorial, deeply rooted in nature and raw craftsmanship",
+    "target_audience": "Discerning urban travelers, nature lovers, architects, slow-travel enthusiasts, family retreats seeking raw clay luxury"
+  },
+  "color_palette": {
+    "primary_terracotta": "#C05621",
+    "terracotta_deep": "#8C3218",
+    "terracotta_light": "#DD6B20",
+    "sand_base": "#F5EBE1",
+    "sand_dark": "#E6D7C3",
+    "lime_wash": "#FCF9F2",
+    "charcoal_earth": "#231F1D",
+    "charcoal_muted": "#3D3531",
+    "paddy_green": "#3B5838",
+    "amber_warmth": "#D97706",
+    "surface_card_light": "#FFFFFF",
+    "surface_card_dark": "#1E1A18",
+    "border_sand": "#E2D3C1",
+    "border_terracotta_subtle": "rgba(192, 86, 33, 0.2)"
+  },
+  "typography": {
+    "font_files_to_load": [
+      "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    ],
+    "headings": {
+      "font_family": "'Cormorant Garamond', 'Georgia', serif",
+      "h1_hero": "text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1]",
+      "h2_section": "text-3xl sm:text-4xl lg:text-5xl font-medium tracking-tight leading-[1.15]",
+      "h3_subsection": "text-xl sm:text-2xl font-semibold leading-snug",
+      "h4_card": "text-lg sm:text-xl font-medium"
+    },
+    "body": {
+      "font_family": "'Plus Jakarta Sans', sans-serif",
+      "size_regular": "text-base leading-relaxed text-[#3D3531]",
+      "size_small": "text-sm leading-normal text-[#62554E]"
+    },
+    "mono_accent": {
+      "font_family": "'JetBrains Mono', monospace",
+      "usage": "Dates, pricing tags, room specs, availability codes, coordinates, badge labels"
+    }
+  },
+  "layout_and_spacing": {
+    "spacing_scale": "Tailwind standard with generous margins: py-20, py-28, px-6, px-12, gap-8, gap-12",
+    "containers": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+    "grid_strategy": {
+      "hero": "Asymmetric split grid with focal photography clipped in terracotta curved frames and animated doodle vector overlay",
+      "bento_architecture": "MODE A Tetris grid (grid-cols-1 md:grid-cols-8 lg:grid-cols-12) for showing Mangalore tiles, clay jaali work, bamboo verandah, paddy pond",
+      "rooms_carousel": "Card grid (grid-cols-1 lg:grid-cols-3) with embedded live availability calendar preview",
+      "tabs_section": "Dual-tab interactive console for Booking & Enquiry with live price calculator and room date picker"
+    }
+  },
+  "design_features": {
+    "header_nav": "Sticky glassmorphism header (backdrop-blur-xl bg-[#FCF9F2]/80 border-b border-[#E2D3C1]) with logo, section links, and direct CTA 'Reserve Stay'",
+    "doodle_motifs": "Custom SVG village doodle line-art overlays (paddy stalks, lantern flame, traditional pottery wheel, village house line outline) drawn in terracotta strokes",
+    "room_types": [
+      {
+        "id": "verandah-suite",
+        "title": "The Bamboo Verandah Suite",
+        "capacity": "Up to 3 Guests",
+        "rate": "₹6,500 / night",
+        "features": ["Private open verandah", "Paddy field & pond view", "Hand-crafted rattan swing", "Lime wash earthen bath"]
+      },
+      {
+        "id": "family-clay-room",
+        "title": "Two-Storey Family Clay Haven",
+        "capacity": "Up to 5 Guests",
+        "rate": "₹9,200 / night",
+        "features": ["Double floor layout", "Mangalore tiled roof balcony", "Brick jaali ambient ventilation", "Private garden courtyard"]
+      },
+      {
+        "id": "double-brick-room",
+        "title": "Terracotta Double Room",
+        "capacity": "2 Guests",
+        "rate": "₹4,800 / night",
+        "features": ["Raw brick accent wall", "Warm lantern light setup", "Organic cotton bedding", "Courtyard access"]
+      }
+    ],
+    "interactivity": [
+      "Room Availability Calendar per room (Interactive state showing Free vs Booked dates with quick selection)",
+      "Tabbed Booking vs. General Enquiry forms with real-time field validation, date selectors, guest counter, and instant summary sheet",
+      "Interactive Village Map / Experiences slider (Paddy walks, Pottery making, Clay-pot dining, Lantern night stargazing)",
+      "Motion entrance effects using Framer Motion with smooth stagger and lenis scroll"
+    ]
+  },
+  "image_urls": {
+    "hero_exterior": "https://images.unsplash.com/photo-1615976384429-b02ca1cbb8f1?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "house_brick_overview": "https://images.unsplash.com/photo-1614209466587-1ab355e015ba?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "aerial_paddy_setting": "https://images.unsplash.com/photo-1575281340462-65340b91626d?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "room_cozy_window": "https://images.unsplash.com/photo-1774280954999-9758f11f3d41?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "room_verandah_curtain": "https://images.unsplash.com/photo-1778726444642-3f374cbffef5?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "room_clay_bath": "https://images.unsplash.com/photo-1778331246390-2b91f56864e4?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "village_food_claypot_1": "https://images.unsplash.com/photo-1777613112957-a43891adf2fd?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "village_food_claypot_2": "https://images.unsplash.com/photo-1773209927898-a0a7e0a13125?crop=entropy&cs=srgb&fm=jpg&q=85"
+  },
+  "testing_and_accessibility": {
+    "data_testid_convention": "All clickable buttons, inputs, tabs, modal controls, calendar dates, and key content blocks must feature data-testid attributes in kebab-case.",
+    "required_test_ids": [
+      "navbar",
+      "nav-brand-logo",
+      "nav-link-manifesto",
+      "nav-link-architecture",
+      "nav-link-rooms",
+      "nav-link-experiences",
+      "nav-link-booking",
+      "nav-btn-reserve-now",
+      "hero-title",
+      "hero-subtitle",
+      "hero-cta-book",
+      "hero-cta-enquire",
+      "room-card-verandah-suite",
+      "room-card-family-clay-room",
+      "room-card-double-brick-room",
+      "room-availability-calendar",
+      "booking-enquiry-tabs",
+      "tab-booking-form",
+      "tab-enquiry-form",
+      "input-checkin-date",
+      "input-checkout-date",
+      "input-guest-count",
+      "select-room-type",
+      "input-guest-name",
+      "input-guest-phone",
+      "input-guest-email",
+      "input-special-request",
+      "btn-submit-booking",
+      "btn-submit-enquiry",
+      "contact-strip-whatsapp",
+      "contact-strip-phone",
+      "contact-strip-email"
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Use JavaScript files (.js, .jsx) only, not TypeScript (.tsx).",
+    "Load Cormorant Garamond and Plus Jakarta Sans in index.html or top of index.css.",
+    "Do NOT use pure transparent headers. Use semi-opaque tinted glass with backdrop blur.",
+    "Do NOT use generic blue or purple gradients. Stick strictly to Terracotta (#C05621), Sand (#F5EBE1), Lime Wash (#FCF9F2), and Earth Charcoal (#231F1D).",
+    "Ensure every form field and button has explicit hover, active, and focus styles with appropriate contrast.",
+    "Make sure room availability calendar is interactive and clearly distinguishes between available and booked days.",
+    "Ensure FastAPI backend endpoints are connected for submitting bookings and enquiries smoothly."
+  ]
+}
