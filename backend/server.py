@@ -244,6 +244,7 @@ class BookingCreate(BaseModel):
     check_out: date
     guests: int = Field(ge=1, le=10)
     message: Optional[str] = Field(default=None, max_length=1000)
+    lang: Literal["en", "bn"] = "en"
 
 
 class EnquiryCreate(BaseModel):
@@ -251,6 +252,7 @@ class EnquiryCreate(BaseModel):
     email: EmailStr
     phone: Optional[str] = Field(default=None, max_length=20)
     message: str = Field(min_length=5, max_length=1500)
+    lang: Literal["en", "bn"] = "en"
 
 
 # ---- Routes ----
@@ -287,19 +289,38 @@ async def get_availability(month: str):
         while d < end:
             booked.setdefault(b["room_id"], []).append(d.isoformat())
             d += timedelta(days=1)
+    block_cursor = db.blocks.find(
+        {"check_in": {"$lte": last.isoformat()}, "check_out": {"$gt": first.isoformat()}},
+        {"_id": 0, "room_id": 1, "check_in": 1, "check_out": 1},
+    )
+    async for b in block_cursor:
+        d0 = date.fromisoformat(b["check_in"])
+        d1 = date.fromisoformat(b["check_out"])
+        d = max(d0, first)
+        end = min(d1, next_month)
+        while d < end:
+            booked.setdefault(b["room_id"], []).append(d.isoformat())
+            d += timedelta(days=1)
     return {"month": month, "booked": booked}
 
 
-def _booking_email_rows(b: dict, room: dict) -> str:
+ROW_LABELS = {
+    "en": {"room": "Room", "in": "Check-in", "out": "Check-out", "guests": "Guests", "name": "Name", "email": "Email", "phone": "Phone", "req": "Requests"},
+    "bn": {"room": "ঘর", "in": "আগমন", "out": "প্রস্থান", "guests": "অতিথি", "name": "নাম", "email": "ইমেইল", "phone": "ফোন", "req": "অনুরোধ"},
+}
+
+
+def _booking_email_rows(b: dict, room: dict, lang: str = "en") -> str:
+    L = ROW_LABELS.get(lang, ROW_LABELS["en"])
     rows = [
-        ("Room", room["name"]),
-        ("Check-in", b["check_in"]),
-        ("Check-out", b["check_out"]),
-        ("Guests", str(b["guests"])),
-        ("Name", b["name"]),
-        ("Email", b["email"]),
-        ("Phone", b["phone"]),
-        ("Requests", b.get("message") or "—"),
+        (L["room"], room["name"]),
+        (L["in"], b["check_in"]),
+        (L["out"], b["check_out"]),
+        (L["guests"], str(b["guests"])),
+        (L["name"], b["name"]),
+        (L["email"], b["email"]),
+        (L["phone"], b["phone"]),
+        (L["req"], b.get("message") or "—"),
     ]
     return "".join(
         f'<tr><td style="padding:8px 16px 8px 0;color:#8C3218;font-size:13px;vertical-align:top">{escape(k)}</td>'
@@ -323,6 +344,13 @@ async def create_booking(input: BookingCreate):
          "check_out": {"$gt": input.check_in.isoformat()}},
         {"_id": 0},
     )
+    if not clash:
+        clash = await db.blocks.find_one(
+            {"room_id": input.room_id,
+             "check_in": {"$lt": input.check_out.isoformat()},
+             "check_out": {"$gt": input.check_in.isoformat()}},
+            {"_id": 0},
+        )
     if clash:
         raise HTTPException(status_code=409, detail="Those dates are already reserved for this room")
 
@@ -346,17 +374,31 @@ async def create_booking(input: BookingCreate):
         )
         await _try_send(to=OWNER_EMAIL, subject=f"New booking request — {room['name']}", html=owner_html)
 
-    guest_html = (
-        '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
-        '<tr><td style="font-family:Georgia,serif">'
-        f'<h2 style="color:#C05621;margin:0 0 12px">We have received your stay request</h2>'
-        f'<p style="font-size:14px;color:#231F1D">Dear {escape(doc["name"])}, thank you for choosing {escape(EMAIL_FROM_NAME)}.</p>'
-        f'<table>{_booking_email_rows(doc, room)}</table>'
-        '<p style="font-size:13px;color:#3D3531">We will confirm your reservation shortly.</p>'
-        f'<p style="font-size:12px;color:#888;margin-top:16px">Sent by {escape(EMAIL_FROM_NAME)}. We never ask for passwords or card details by email.</p>'
-        '</td></tr></table>'
-    )
-    await _try_send(to=doc["email"], subject=f"Your {EMAIL_FROM_NAME} stay request", html=guest_html)
+    if doc.get("lang") == "bn":
+        guest_html = (
+            '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
+            '<tr><td style="font-family:Georgia,serif">'
+            f'<h2 style="color:#C05621;margin:0 0 12px">আপনার থাকার অনুরোধ পৌঁছে গেছে</h2>'
+            f'<p style="font-size:14px;color:#231F1D">প্রিয় {escape(doc["name"])}, {escape(EMAIL_FROM_NAME)} বেছে নেওয়ার জন্য ধন্যবাদ।</p>'
+            f'<table>{_booking_email_rows(doc, room, "bn")}</table>'
+            '<p style="font-size:13px;color:#3D3531">আমরা শীঘ্রই আপনার বুকিং নিশ্চিত করব।</p>'
+            f'<p style="font-size:12px;color:#888;margin-top:16px">{escape(EMAIL_FROM_NAME)} থেকে পাঠানো। আমরা কখনোই ইমেইলে পাসওয়ার্ড বা কার্ডের তথ্য চাই না।</p>'
+            '</td></tr></table>'
+        )
+        subject = f"আপনার {EMAIL_FROM_NAME} থাকার অনুরোধ"
+    else:
+        guest_html = (
+            '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
+            '<tr><td style="font-family:Georgia,serif">'
+            f'<h2 style="color:#C05621;margin:0 0 12px">We have received your stay request</h2>'
+            f'<p style="font-size:14px;color:#231F1D">Dear {escape(doc["name"])}, thank you for choosing {escape(EMAIL_FROM_NAME)}.</p>'
+            f'<table>{_booking_email_rows(doc, room)}</table>'
+            '<p style="font-size:13px;color:#3D3531">We will confirm your reservation shortly.</p>'
+            f'<p style="font-size:12px;color:#888;margin-top:16px">Sent by {escape(EMAIL_FROM_NAME)}. We never ask for passwords or card details by email.</p>'
+            '</td></tr></table>'
+        )
+        subject = f"Your {EMAIL_FROM_NAME} stay request"
+    await _try_send(to=doc["email"], subject=subject, html=guest_html)
     return {"status": "success", "booking": doc}
 
 
@@ -381,15 +423,27 @@ async def create_enquiry(input: EnquiryCreate):
         )
         await _try_send(to=OWNER_EMAIL, subject=f"New enquiry from {doc['name']}", html=owner_html)
 
-    guest_html = (
-        '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
-        '<tr><td style="font-family:Georgia,serif">'
-        f'<h2 style="color:#C05621;margin:0 0 12px">Thank you for your enquiry</h2>'
-        f'<p style="font-size:14px;color:#231F1D">Dear {escape(doc["name"])}, we have received your message and will reply soon.</p>'
-        f'<p style="font-size:12px;color:#888;margin-top:16px">Sent by {escape(EMAIL_FROM_NAME)}. We never ask for passwords or card details by email.</p>'
-        '</td></tr></table>'
-    )
-    await _try_send(to=doc["email"], subject=f"Your {EMAIL_FROM_NAME} enquiry", html=guest_html)
+    if doc.get("lang") == "bn":
+        guest_html = (
+            '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
+            '<tr><td style="font-family:Georgia,serif">'
+            f'<h2 style="color:#C05621;margin:0 0 12px">আপনার জিজ্ঞাসার জন্য ধন্যবাদ</h2>'
+            f'<p style="font-size:14px;color:#231F1D">প্রিয় {escape(doc["name"])}, আপনার বার্তা পেয়েছি — শীঘ্রই উত্তর দেওয়া হবে।</p>'
+            f'<p style="font-size:12px;color:#888;margin-top:16px">{escape(EMAIL_FROM_NAME)} থেকে পাঠানো। আমরা কখনোই ইমেইলে পাসওয়ার্ড বা কার্ডের তথ্য চাই না।</p>'
+            '</td></tr></table>'
+        )
+        subject = f"আপনার {EMAIL_FROM_NAME} জিজ্ঞাসা"
+    else:
+        guest_html = (
+            '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
+            '<tr><td style="font-family:Georgia,serif">'
+            f'<h2 style="color:#C05621;margin:0 0 12px">Thank you for your enquiry</h2>'
+            f'<p style="font-size:14px;color:#231F1D">Dear {escape(doc["name"])}, we have received your message and will reply soon.</p>'
+            f'<p style="font-size:12px;color:#888;margin-top:16px">Sent by {escape(EMAIL_FROM_NAME)}. We never ask for passwords or card details by email.</p>'
+            '</td></tr></table>'
+        )
+        subject = f"Your {EMAIL_FROM_NAME} enquiry"
+    await _try_send(to=doc["email"], subject=subject, html=guest_html)
     return {"status": "success", "enquiry": doc}
 
 
@@ -425,27 +479,53 @@ async def update_booking_status(booking_id: str, input: StatusUpdate, user=Depen
     await db.bookings.update_one({"id": booking_id}, {"$set": {"status": input.status}})
     room = next((r for r in ROOMS if r["id"] == booking["room_id"]), {"name": booking["room_id"]})
     if input.status == "confirmed":
-        html = (
-            '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
-            '<tr><td style="font-family:Georgia,serif">'
-            f'<h2 style="color:#3B5838;margin:0 0 12px">Your stay is confirmed</h2>'
-            f'<p style="font-size:14px;color:#231F1D">Dear {escape(booking["name"])}, we look forward to hosting you at {escape(EMAIL_FROM_NAME)}.</p>'
-            f'<table>{_booking_email_rows(booking, room)}</table>'
-            f'<p style="font-size:12px;color:#888;margin-top:16px">Sent by {escape(EMAIL_FROM_NAME)}.</p>'
-            '</td></tr></table>'
-        )
-        await _try_send(to=booking["email"], subject=f"Your {EMAIL_FROM_NAME} stay is confirmed", html=html)
+        if booking.get("lang") == "bn":
+            html = (
+                '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
+                '<tr><td style="font-family:Georgia,serif">'
+                f'<h2 style="color:#3B5838;margin:0 0 12px">আপনার থাকা নিশ্চিত হয়েছে</h2>'
+                f'<p style="font-size:14px;color:#231F1D">প্রিয় {escape(booking["name"])}, {escape(EMAIL_FROM_NAME)}-এ আপনাকে স্বাগত জানাতে আমরা অপেক্ষা করছি।</p>'
+                f'<table>{_booking_email_rows(booking, room, "bn")}</table>'
+                f'<p style="font-size:12px;color:#888;margin-top:16px">{escape(EMAIL_FROM_NAME)} থেকে পাঠানো।</p>'
+                '</td></tr></table>'
+            )
+            subject = f"আপনার {EMAIL_FROM_NAME} থাকা নিশ্চিত হয়েছে"
+        else:
+            html = (
+                '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
+                '<tr><td style="font-family:Georgia,serif">'
+                f'<h2 style="color:#3B5838;margin:0 0 12px">Your stay is confirmed</h2>'
+                f'<p style="font-size:14px;color:#231F1D">Dear {escape(booking["name"])}, we look forward to hosting you at {escape(EMAIL_FROM_NAME)}.</p>'
+                f'<table>{_booking_email_rows(booking, room)}</table>'
+                f'<p style="font-size:12px;color:#888;margin-top:16px">Sent by {escape(EMAIL_FROM_NAME)}.</p>'
+                '</td></tr></table>'
+            )
+            subject = f"Your {EMAIL_FROM_NAME} stay is confirmed"
+        await _try_send(to=booking["email"], subject=subject, html=html)
     elif input.status == "cancelled":
-        html = (
-            '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
-            '<tr><td style="font-family:Georgia,serif">'
-            f'<h2 style="color:#8C3218;margin:0 0 12px">Your booking was cancelled</h2>'
-            f'<p style="font-size:14px;color:#231F1D">Dear {escape(booking["name"])}, your booking for {escape(room["name"])} '
-            f'({escape(booking["check_in"])} to {escape(booking["check_out"])}) has been cancelled. The dates are free again.</p>'
-            f'<p style="font-size:12px;color:#888;margin-top:16px">Sent by {escape(EMAIL_FROM_NAME)}.</p>'
-            '</td></tr></table>'
-        )
-        await _try_send(to=booking["email"], subject=f"Your {EMAIL_FROM_NAME} booking was cancelled", html=html)
+        if booking.get("lang") == "bn":
+            html = (
+                '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
+                '<tr><td style="font-family:Georgia,serif">'
+                f'<h2 style="color:#8C3218;margin:0 0 12px">আপনার বুকিং বাতিল হয়েছে</h2>'
+                f'<p style="font-size:14px;color:#231F1D">প্রিয় {escape(booking["name"])}, {escape(room["name"])} '
+                f'({escape(booking["check_in"])} থেকে {escape(booking["check_out"])})-এর আপনার বুকিং বাতিল করা হয়েছে। তারিখগুলো আবার খালি আছে।</p>'
+                f'<p style="font-size:12px;color:#888;margin-top:16px">{escape(EMAIL_FROM_NAME)} থেকে পাঠানো।</p>'
+                '</td></tr></table>'
+            )
+            subject = f"আপনার {EMAIL_FROM_NAME} বুকিং বাতিল"
+        else:
+            html = (
+                '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
+                '<tr><td style="font-family:Georgia,serif">'
+                f'<h2 style="color:#8C3218;margin:0 0 12px">Your booking was cancelled</h2>'
+                f'<p style="font-size:14px;color:#231F1D">Dear {escape(booking["name"])}, your booking for {escape(room["name"])} '
+                f'({escape(booking["check_in"])} to {escape(booking["check_out"])}) has been cancelled. The dates are free again.</p>'
+                f'<p style="font-size:12px;color:#888;margin-top:16px">Sent by {escape(EMAIL_FROM_NAME)}.</p>'
+                '</td></tr></table>'
+            )
+            subject = f"Your {EMAIL_FROM_NAME} booking was cancelled"
+        await _try_send(to=booking["email"], subject=subject, html=html)
     return {"status": "success", "booking_id": booking_id, "new_status": input.status}
 
 
@@ -556,6 +636,46 @@ async def seed_reviews():
 async def list_reviews():
     items = await db.reviews.find({}, {"_id": 0}).to_list(50)
     return {"reviews": items}
+
+
+class BlockCreate(BaseModel):
+    room_id: str
+    check_in: date
+    check_out: date
+    note: Optional[str] = Field(default=None, max_length=200)
+
+
+@api_router.get("/blocks")
+async def list_blocks(user=Depends(get_current_user)):
+    items = await db.blocks.find({}, {"_id": 0}).sort("check_in", 1).to_list(500)
+    return {"blocks": items}
+
+
+@api_router.post("/blocks")
+async def create_block(input: BlockCreate, user=Depends(get_current_user)):
+    if not any(r["id"] == input.room_id for r in ROOMS):
+        raise HTTPException(status_code=400, detail="Unknown room")
+    if input.check_out <= input.check_in:
+        raise HTTPException(status_code=400, detail="End date must be after start date")
+    doc = {
+        "id": str(uuid.uuid4()),
+        "room_id": input.room_id,
+        "check_in": input.check_in.isoformat(),
+        "check_out": input.check_out.isoformat(),
+        "note": input.note,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.blocks.insert_one(doc)
+    doc.pop("_id", None)
+    return {"status": "success", "block": doc}
+
+
+@api_router.delete("/blocks/{block_id}")
+async def delete_block(block_id: str, user=Depends(get_current_user)):
+    res = await db.blocks.delete_one({"id": block_id})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Block not found")
+    return {"status": "success"}
 
 
 app.include_router(api_router)

@@ -4,6 +4,8 @@ import { Languages } from "lucide-react";
 import { scrollToId } from "../hooks/useLenis";
 import { useLang } from "../i18n";
 
+const LOGO = "https://customer-assets-lqy194kg.emergentagent.net/job_room-availability-13/artifacts/0fscfhjg_file_000000002644720891c00d296e98d019.png";
+
 export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const { lang, setLang, t } = useLang();
@@ -37,9 +39,9 @@ export const Navbar = () => {
           onClick={() => scrollToId("home")}
           className="flex items-center gap-3 group"
         >
-          <span className="w-9 h-9 rounded-t-full bg-terra text-limewash flex items-center justify-center font-serif text-lg italic group-hover:bg-terra-deep transition-colors">D</span>
+          <img src={LOGO} alt="Dhansiri Farmstay logo" data-testid="nav-logo-img" className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover ring-1 ring-sand-dark group-hover:ring-terra transition-all" />
           <span className="font-serif text-xl sm:text-2xl font-semibold tracking-tight text-earth">
-            Dhansiri <span className="italic text-terra">homestay</span>
+            Dhansiri <span className="italic text-terra">farmstay</span>
           </span>
         </button>
         <nav className="hidden md:flex items-center gap-7">

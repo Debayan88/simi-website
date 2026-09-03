@@ -4,7 +4,7 @@ import { DoodlePaddy } from "./Doodle";
 import { useLang } from "../i18n";
 
 const CHAPTER_IMAGES = [
-  { img: "https://images.unsplash.com/photo-1614209466587-1ab355e015ba?crop=entropy&cs=srgb&fm=jpg&q=85", alt: "Brick and clay architecture of the homestay" },
+  { img: "https://customer-assets-rejwkqb3.emergentagent.net/job_952784df-8b7c-47b6-9073-5b1a9a34f77f/artifacts/vndszagt_IMG20260614093335.webp", alt: "Dhansiri rising — the real house in raw brick by the pond, June 2026" },
   { img: "https://images.unsplash.com/photo-1575281340462-65340b91626d?crop=entropy&cs=srgb&fm=jpg&q=85", alt: "Paddy fields and pond setting around the homestay" },
   { img: "https://images.unsplash.com/photo-1777613112957-a43891adf2fd?crop=entropy&cs=srgb&fm=jpg&q=85", alt: "Clay-pot village dining" },
 ];

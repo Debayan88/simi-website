@@ -29,6 +29,12 @@ User provided a concept board (Village Homestay — Terracotta & Sand, two-store
 - Booking form with live nights/total calculator; enquiry form; both persist + trigger emails
 - Verified: curl for all endpoints incl. double-booking rejection; UI booking submitted → toast → calendar blocks dates instantly; email proxy returned 202 Accepted (guest confirmations to resend test address)
 
+## Implemented (2026-09-03, v4)
+- Brand corrected to "Dhansiri Farmstay" everywhere (navbar + footer show the official circular logo, hero subtitle EN/BN, WhatsApp prefill message, EMAIL_FROM_NAME so all guest/owner emails send as Dhansiri Farmstay)
+- Real construction photo (June 2026) placed in Manifesto chapter 01 "Earth"; hero/room images remain stock until finished-house photos are shared
+- Owner date blocking: blocks collection + GET/POST/DELETE /api/blocks (auth); dashboard "Block dates — family use & maintenance" card (room, first/last blocked date, private note, unblock); blocked dates show as taken on the public calendar and reject guest bookings (409)
+- Bengali guest emails: booking/enquiry payloads carry lang; booking-received, enquiry-ack, confirmed and cancelled emails have full Bengali templates when guest books from the Bengali site. Owner notifications stay English.
+
 ## Implemented (2026-09-02, v3.1)
 - Demo data wiped: all 3 test bookings + 1 test enquiry + 4 sample reviews deleted; calendar fully fresh
 - Reviews wall hidden from landing page (no real guest words yet); GET /api/reviews and the Reviews component remain in code, DB empty — paste real words to re-enable

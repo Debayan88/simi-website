@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { LogOut, Check, X, RotateCcw, Phone, Mail, Lock } from "lucide-react";
+import { LogOut, Check, X, RotateCcw, Phone, Mail, Lock, CalendarOff, Trash2 } from "lucide-react";
 import dayjs from "dayjs";
 import { toast } from "sonner";
 import api from "../lib/api";
@@ -109,11 +109,15 @@ const Dashboard = () => {
   const [rooms, setRooms] = useState([]);
   const [pw, setPw] = useState({ current: "", next: "", confirm: "" });
   const [pwBusy, setPwBusy] = useState(false);
+  const [blocks, setBlocks] = useState([]);
+  const [bl, setBl] = useState({ room_id: "verandah-suite", from: "", to: "", note: "" });
+  const [blBusy, setBlBusy] = useState(false);
 
   const load = useCallback(() => {
     api.get("/bookings").then((r) => setBookings(r.data.bookings)).catch(() => {});
     api.get("/enquiries").then((r) => setEnquiries(r.data.enquiries)).catch(() => {});
     api.get("/rooms").then((r) => setRooms(r.data.rooms)).catch(() => {});
+    api.get("/blocks").then((r) => setBlocks(r.data.blocks)).catch(() => {});
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -148,6 +152,40 @@ const Dashboard = () => {
       toast.error(formatApiErrorDetail(err.response?.data?.detail));
     } finally {
       setPwBusy(false);
+    }
+  };
+
+  const submitBlock = async (e) => {
+    e.preventDefault();
+    if (!bl.from || !bl.to || dayjs(bl.to).isBefore(dayjs(bl.from))) {
+      toast.error("Last blocked date must be on or after the first");
+      return;
+    }
+    setBlBusy(true);
+    try {
+      await api.post("/blocks", {
+        room_id: bl.room_id,
+        check_in: bl.from,
+        check_out: dayjs(bl.to).add(1, "day").format("YYYY-MM-DD"),
+        note: bl.note || null,
+      });
+      toast.success("Dates blocked — the calendar now shows them as taken");
+      setBl({ room_id: bl.room_id, from: "", to: "", note: "" });
+      load();
+    } catch (err) {
+      toast.error(formatApiErrorDetail(err.response?.data?.detail));
+    } finally {
+      setBlBusy(false);
+    }
+  };
+
+  const unblock = async (id) => {
+    try {
+      await api.delete(`/blocks/${id}`);
+      toast.success("Dates unblocked");
+      load();
+    } catch (err) {
+      toast.error(formatApiErrorDetail(err.response?.data?.detail));
     }
   };
 
@@ -209,8 +247,59 @@ const Dashboard = () => {
           </div>
         )}
 
-        <div className="mt-12 border-t border-sand-dark pt-10">
-          <div className="bg-white border border-sand-dark rounded-[24px] p-6 sm:p-8 max-w-md" data-testid="settings-card">
+        <div className="mt-12 border-t border-sand-dark pt-10 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          <div className="bg-white border border-sand-dark rounded-[24px] p-6 sm:p-8" data-testid="block-dates-card">
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-terra flex items-center gap-2">
+              <CalendarOff className="w-3.5 h-3.5" /> Block dates
+            </p>
+            <h3 className="font-serif text-2xl text-earth font-semibold mt-2">Family use & maintenance</h3>
+            <form onSubmit={submitBlock} className="mt-5 space-y-4">
+              <div>
+                <label className="block font-mono text-[10px] uppercase tracking-[0.2em] text-earth-muted mb-2" htmlFor="block-room">Room</label>
+                <select id="block-room" data-testid="block-room-select" value={bl.room_id} onChange={(e) => setBl((s) => ({ ...s, room_id: e.target.value }))} className={inputCls}>
+                  {rooms.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-mono text-[10px] uppercase tracking-[0.2em] text-earth-muted mb-2" htmlFor="block-from">First blocked date</label>
+                  <input id="block-from" data-testid="block-from-date" type="date" required min={dayjs().format("YYYY-MM-DD")} value={bl.from} onChange={(e) => setBl((s) => ({ ...s, from: e.target.value }))} className={`${inputCls} font-mono`} />
+                </div>
+                <div>
+                  <label className="block font-mono text-[10px] uppercase tracking-[0.2em] text-earth-muted mb-2" htmlFor="block-to">Last blocked date</label>
+                  <input id="block-to" data-testid="block-to-date" type="date" required min={bl.from || dayjs().format("YYYY-MM-DD")} value={bl.to} onChange={(e) => setBl((s) => ({ ...s, to: e.target.value }))} className={`${inputCls} font-mono`} />
+                </div>
+              </div>
+              <div>
+                <label className="block font-mono text-[10px] uppercase tracking-[0.2em] text-earth-muted mb-2" htmlFor="block-note">Note (only you see this)</label>
+                <input id="block-note" data-testid="block-note-input" value={bl.note} onChange={(e) => setBl((s) => ({ ...s, note: e.target.value }))} className={inputCls} placeholder="Family visit, roof repair…" />
+              </div>
+              <button type="submit" data-testid="btn-block-dates" disabled={blBusy} className="w-full rounded-full bg-earth text-limewash py-3 text-sm font-medium hover:bg-earth-muted active:scale-[0.98] transition-all disabled:opacity-60">
+                {blBusy ? "Blocking…" : "Block these dates"}
+              </button>
+            </form>
+            {blocks.length > 0 && (
+              <div className="mt-6 space-y-3" data-testid="blocks-list">
+                {blocks.map((b2) => {
+                  const bRoom = rooms.find((r) => r.id === b2.room_id);
+                  const lastDay = dayjs(b2.check_out).subtract(1, "day").format("YYYY-MM-DD");
+                  return (
+                    <div key={b2.id} className="flex items-center justify-between gap-3 bg-sand/60 border border-sand-dark rounded-xl px-4 py-3" data-testid={`block-row-${b2.id}`}>
+                      <div>
+                        <p className="font-mono text-xs text-earth">{b2.check_in} → {lastDay}</p>
+                        <p className="text-xs text-earth-muted mt-0.5">{bRoom?.name || b2.room_id}{b2.note ? ` · ${b2.note}` : ""}</p>
+                      </div>
+                      <button onClick={() => unblock(b2.id)} data-testid={`block-remove-${b2.id}`} className="shrink-0 rounded-full border border-red-300 text-red-700 p-2 hover:bg-red-50 active:scale-[0.95] transition-all" aria-label="Unblock">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white border border-sand-dark rounded-[24px] p-6 sm:p-8" data-testid="settings-card">
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-terra flex items-center gap-2">
               <Lock className="w-3.5 h-3.5" /> Settings
             </p>

@@ -3,6 +3,8 @@ import { Phone, MessageCircle, Mail } from "lucide-react";
 import { DoodleLantern } from "./Doodle";
 import { useLang } from "../i18n";
 
+const LOGO = "https://customer-assets-lqy194kg.emergentagent.net/job_room-availability-13/artifacts/0fscfhjg_file_000000002644720891c00d296e98d019.png";
+
 export const Contact = () => {
   const { t } = useLang();
   const CARDS = [
@@ -47,8 +49,9 @@ export const Contact = () => {
         </div>
 
         <footer className="mt-24 border-t border-sand-dark pt-10 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="font-serif text-lg text-earth">
-            Dhansiri <span className="italic text-terra">homestay</span>
+          <p className="font-serif text-lg text-earth flex items-center gap-3">
+            <img src={LOGO} alt="Dhansiri Farmstay logo" className="w-12 h-12 rounded-full object-cover ring-1 ring-sand-dark" data-testid="footer-logo" />
+            Dhansiri <span className="italic text-terra">farmstay</span>
           </p>
           <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-earth-muted" data-testid="footer-coordinates">
             {t("contact.coords")}

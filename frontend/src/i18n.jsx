@@ -6,7 +6,7 @@ export const T = {
     hero: {
       kicker: "Est. 2026 · Kulpi, West Bengal · 20 km from Bakkhali",
       l1: "A house of clay,", l2a: "light & ", l2em: "slow", l3: "mornings.",
-      subtitle: "Dhansiri is a two-storey village homestay of raw brick, Mangalore tile and lime wash — open verandahs over the paddy pond, lantern light at dusk, and doodle-art walls that tell the village's story.",
+      subtitle: "Dhansiri is a two-storey village farmstay of raw brick, Mangalore tile and lime wash — open verandahs over the paddy pond, lantern light at dusk, and doodle-art walls that tell the village's story.",
       book: "Reserve your stay", enquire: "Send an enquiry",
       stats: ["Rooms", "Floors", "Pond"],
       hosting: "Now hosting", hostingSub: "Monsoon season stays",
@@ -79,7 +79,7 @@ export const T = {
     hero: {
       kicker: "স্থাপিত ২০২৬ · কুলপি, পশ্চিমবঙ্গ · বাকখালি থেকে ২০ কিমি",
       l1: "মাটির ঘর,", l2a: "আলো আর ", l2em: "ধীর", l3: "সকাল।",
-      subtitle: "ধানসিরি — কুলপির একটি দোতলা গ্রামের হোমস্টে; কাঁচা ইট, ম্যাঙ্গালোর টাইল আর চুনকামের দেয়াল — ধানক্ষেতের পুকুরের উপর খোলা বারান্দা, সন্ধ্যায় হারিকেনের আলো, আর দেয়ালে গাঁয়ের গল্পের আঁকিবুঁকি।",
+      subtitle: "ধানসিরি — কুলপির একটি দোতলা গ্রামের ফার্মস্টে; কাঁচা ইট, ম্যাঙ্গালোর টাইল আর চুনকামের দেয়াল — ধানক্ষেতের পুকুরের উপর খোলা বারান্দা, সন্ধ্যায় হারিকেনের আলো, আর দেয়ালে গাঁয়ের গল্পের আঁকিবুঁকি।",
       book: "থাকার জায়গা বুক করুন", enquire: "জিজ্ঞাসা পাঠান",
       stats: ["ঘর", "তলা", "পুকুর"],
       hosting: "এখন চলছে", hostingSub: "বর্ষাকালীন অতিথি আপ্যায়ন",

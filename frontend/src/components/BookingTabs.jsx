@@ -14,7 +14,7 @@ const labelCls = "block font-mono text-[10px] uppercase tracking-[0.2em] text-ea
 export const BookingTabs = () => {
   const [rooms, setRooms] = useState([]);
   const [sending, setSending] = useState(false);
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const roomData = t("rooms.data");
 
   const [bk, setBk] = useState({
@@ -40,7 +40,7 @@ export const BookingTabs = () => {
 
   const waLink = useMemo(() => {
     if (!room || nights <= 0) return null;
-    const msg = `Hello Dhansiri Homestay! I'd like to book the ${room.name}.\nCheck-in: ${bk.check_in}\nCheck-out: ${bk.check_out}\nGuests: ${bk.guests}${bk.name ? `\nName: ${bk.name}` : ""}\nEstimated total: ₹${total.toLocaleString("en-IN")}`;
+    const msg = `Hello Dhansiri Farmstay! I'd like to book the ${room.name}.\nCheck-in: ${bk.check_in}\nCheck-out: ${bk.check_out}\nGuests: ${bk.guests}${bk.name ? `\nName: ${bk.name}` : ""}\nEstimated total: ₹${total.toLocaleString("en-IN")}`;
     return `https://wa.me/919903690119?text=${encodeURIComponent(msg)}`;
   }, [room, nights, bk, total]);
 
@@ -55,7 +55,7 @@ export const BookingTabs = () => {
     }
     setSending(true);
     try {
-      await api.post("/bookings", bk);
+      await api.post("/bookings", { ...bk, lang });
       toast.success(t("booking.toastOk"));
       setBk((s) => ({ ...s, name: "", email: "", phone: "", check_in: "", check_out: "", message: "" }));
       window.dispatchEvent(new Event("refresh-availability"));
