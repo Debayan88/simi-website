@@ -29,6 +29,10 @@ User provided a concept board (Village Homestay — Terracotta & Sand, two-store
 - Booking form with live nights/total calculator; enquiry form; both persist + trigger emails
 - Verified: curl for all endpoints incl. double-booking rejection; UI booking submitted → toast → calendar blocks dates instantly; email proxy returned 202 Accepted (guest confirmations to resend test address)
 
+## Implemented (2026-09-03, v4.3)
+- Tap-to-zoom gallery lightbox: tap any strip photo → full-screen view with caption/counter, prev/next arrows, arrow-key + Escape + backdrop-close
+- Room interiors: no new photos were attached — room cards still stock (awaiting interior shots)
+
 ## Implemented (2026-09-03, v4.2)
 - Favicon + browser tab title: emblem as tab icon/apple-touch-icon, title "Dhansiri Farmstay · Kulpi, West Bengal", theme-color terracotta
 - Photo gallery strip ("Dhansiri, rising") between Manifesto and Rooms: 5 real site photos (4 new Aug 2026 shots + June construction webp), slow auto-scroll, pauses on hover, edge fades, bilingual kicker/caption
