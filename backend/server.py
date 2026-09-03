@@ -39,6 +39,10 @@ EMAIL_FROM_NAME = os.environ["EMAIL_FROM_NAME"]
 EMAIL_REPLY_TO = os.environ.get("EMAIL_REPLY_TO")
 OWNER_EMAIL = os.environ.get("OWNER_EMAIL")
 
+LOGO_URL = "https://customer-assets-lqy194kg.emergentagent.net/job_room-availability-13/artifacts/0fscfhjg_file_000000002644720891c00d296e98d019.png"
+EMAIL_HEADER = (f'<img src="{LOGO_URL}" alt="Dhansiri Farmstay" width="72" '
+                'style="border-radius:50%;display:block;margin:0 0 16px">')
+
 JWT_ALGORITHM = "HS256"
 
 
@@ -366,7 +370,7 @@ async def create_booking(input: BookingCreate):
     if OWNER_EMAIL:
         owner_html = (
             '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
-            '<tr><td style="font-family:Georgia,serif">'
+            '<tr><td style="font-family:Georgia,serif">' f"{EMAIL_HEADER}"
             f'<h2 style="color:#C05621;margin:0 0 12px">New booking request</h2>'
             f'<table>{_booking_email_rows(doc, room)}</table>'
             f'<p style="font-size:12px;color:#888;margin-top:16px">Sent by {escape(EMAIL_FROM_NAME)} booking system.</p>'
@@ -377,7 +381,7 @@ async def create_booking(input: BookingCreate):
     if doc.get("lang") == "bn":
         guest_html = (
             '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
-            '<tr><td style="font-family:Georgia,serif">'
+            '<tr><td style="font-family:Georgia,serif">' f"{EMAIL_HEADER}"
             f'<h2 style="color:#C05621;margin:0 0 12px">আপনার থাকার অনুরোধ পৌঁছে গেছে</h2>'
             f'<p style="font-size:14px;color:#231F1D">প্রিয় {escape(doc["name"])}, {escape(EMAIL_FROM_NAME)} বেছে নেওয়ার জন্য ধন্যবাদ।</p>'
             f'<table>{_booking_email_rows(doc, room, "bn")}</table>'
@@ -389,7 +393,7 @@ async def create_booking(input: BookingCreate):
     else:
         guest_html = (
             '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
-            '<tr><td style="font-family:Georgia,serif">'
+            '<tr><td style="font-family:Georgia,serif">' f"{EMAIL_HEADER}"
             f'<h2 style="color:#C05621;margin:0 0 12px">We have received your stay request</h2>'
             f'<p style="font-size:14px;color:#231F1D">Dear {escape(doc["name"])}, thank you for choosing {escape(EMAIL_FROM_NAME)}.</p>'
             f'<table>{_booking_email_rows(doc, room)}</table>'
@@ -413,7 +417,7 @@ async def create_enquiry(input: EnquiryCreate):
     if OWNER_EMAIL:
         owner_html = (
             '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
-            '<tr><td style="font-family:Georgia,serif">'
+            '<tr><td style="font-family:Georgia,serif">' f"{EMAIL_HEADER}"
             f'<h2 style="color:#C05621;margin:0 0 12px">New enquiry</h2>'
             f'<p style="font-size:13px;color:#231F1D"><strong>{escape(doc["name"])}</strong> '
             f'({escape(doc["email"])}{", " + escape(doc["phone"]) if doc.get("phone") else ""}) wrote:</p>'
@@ -426,7 +430,7 @@ async def create_enquiry(input: EnquiryCreate):
     if doc.get("lang") == "bn":
         guest_html = (
             '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
-            '<tr><td style="font-family:Georgia,serif">'
+            '<tr><td style="font-family:Georgia,serif">' f"{EMAIL_HEADER}"
             f'<h2 style="color:#C05621;margin:0 0 12px">আপনার জিজ্ঞাসার জন্য ধন্যবাদ</h2>'
             f'<p style="font-size:14px;color:#231F1D">প্রিয় {escape(doc["name"])}, আপনার বার্তা পেয়েছি — শীঘ্রই উত্তর দেওয়া হবে।</p>'
             f'<p style="font-size:12px;color:#888;margin-top:16px">{escape(EMAIL_FROM_NAME)} থেকে পাঠানো। আমরা কখনোই ইমেইলে পাসওয়ার্ড বা কার্ডের তথ্য চাই না।</p>'
@@ -436,7 +440,7 @@ async def create_enquiry(input: EnquiryCreate):
     else:
         guest_html = (
             '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
-            '<tr><td style="font-family:Georgia,serif">'
+            '<tr><td style="font-family:Georgia,serif">' f"{EMAIL_HEADER}"
             f'<h2 style="color:#C05621;margin:0 0 12px">Thank you for your enquiry</h2>'
             f'<p style="font-size:14px;color:#231F1D">Dear {escape(doc["name"])}, we have received your message and will reply soon.</p>'
             f'<p style="font-size:12px;color:#888;margin-top:16px">Sent by {escape(EMAIL_FROM_NAME)}. We never ask for passwords or card details by email.</p>'
@@ -482,7 +486,7 @@ async def update_booking_status(booking_id: str, input: StatusUpdate, user=Depen
         if booking.get("lang") == "bn":
             html = (
                 '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
-                '<tr><td style="font-family:Georgia,serif">'
+                '<tr><td style="font-family:Georgia,serif">' f"{EMAIL_HEADER}"
                 f'<h2 style="color:#3B5838;margin:0 0 12px">আপনার থাকা নিশ্চিত হয়েছে</h2>'
                 f'<p style="font-size:14px;color:#231F1D">প্রিয় {escape(booking["name"])}, {escape(EMAIL_FROM_NAME)}-এ আপনাকে স্বাগত জানাতে আমরা অপেক্ষা করছি।</p>'
                 f'<table>{_booking_email_rows(booking, room, "bn")}</table>'
@@ -493,7 +497,7 @@ async def update_booking_status(booking_id: str, input: StatusUpdate, user=Depen
         else:
             html = (
                 '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
-                '<tr><td style="font-family:Georgia,serif">'
+                '<tr><td style="font-family:Georgia,serif">' f"{EMAIL_HEADER}"
                 f'<h2 style="color:#3B5838;margin:0 0 12px">Your stay is confirmed</h2>'
                 f'<p style="font-size:14px;color:#231F1D">Dear {escape(booking["name"])}, we look forward to hosting you at {escape(EMAIL_FROM_NAME)}.</p>'
                 f'<table>{_booking_email_rows(booking, room)}</table>'
@@ -506,7 +510,7 @@ async def update_booking_status(booking_id: str, input: StatusUpdate, user=Depen
         if booking.get("lang") == "bn":
             html = (
                 '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
-                '<tr><td style="font-family:Georgia,serif">'
+                '<tr><td style="font-family:Georgia,serif">' f"{EMAIL_HEADER}"
                 f'<h2 style="color:#8C3218;margin:0 0 12px">আপনার বুকিং বাতিল হয়েছে</h2>'
                 f'<p style="font-size:14px;color:#231F1D">প্রিয় {escape(booking["name"])}, {escape(room["name"])} '
                 f'({escape(booking["check_in"])} থেকে {escape(booking["check_out"])})-এর আপনার বুকিং বাতিল করা হয়েছে। তারিখগুলো আবার খালি আছে।</p>'
@@ -517,7 +521,7 @@ async def update_booking_status(booking_id: str, input: StatusUpdate, user=Depen
         else:
             html = (
                 '<table role="presentation" width="100%" style="background:#FCF9F2;padding:24px">'
-                '<tr><td style="font-family:Georgia,serif">'
+                '<tr><td style="font-family:Georgia,serif">' f"{EMAIL_HEADER}"
                 f'<h2 style="color:#8C3218;margin:0 0 12px">Your booking was cancelled</h2>'
                 f'<p style="font-size:14px;color:#231F1D">Dear {escape(booking["name"])}, your booking for {escape(room["name"])} '
                 f'({escape(booking["check_in"])} to {escape(booking["check_out"])}) has been cancelled. The dates are free again.</p>'

@@ -29,6 +29,11 @@ User provided a concept board (Village Homestay — Terracotta & Sand, two-store
 - Booking form with live nights/total calculator; enquiry form; both persist + trigger emails
 - Verified: curl for all endpoints incl. double-booking rejection; UI booking submitted → toast → calendar blocks dates instantly; email proxy returned 202 Accepted (guest confirmations to resend test address)
 
+## Implemented (2026-09-03, v4.1)
+- Farmstay emblem added to the top of every guest + owner email (all 8 templates, verified 202 sends through the guardrail gate)
+- Giant faded logo watermark with slow parallax behind the hero; navbar logo enlarged (56–64px, header 80–96px), footer logo 80px
+- Room card photos still stock — no finished-room photos attached yet
+
 ## Implemented (2026-09-03, v4)
 - Brand corrected to "Dhansiri Farmstay" everywhere (navbar + footer show the official circular logo, hero subtitle EN/BN, WhatsApp prefill message, EMAIL_FROM_NAME so all guest/owner emails send as Dhansiri Farmstay)
 - Real construction photo (June 2026) placed in Manifesto chapter 01 "Earth"; hero/room images remain stock until finished-house photos are shared

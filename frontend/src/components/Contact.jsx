@@ -50,7 +50,7 @@ export const Contact = () => {
 
         <footer className="mt-24 border-t border-sand-dark pt-10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="font-serif text-lg text-earth flex items-center gap-3">
-            <img src={LOGO} alt="Dhansiri Farmstay logo" className="w-12 h-12 rounded-full object-cover ring-1 ring-sand-dark" data-testid="footer-logo" />
+            <img src={LOGO} alt="Dhansiri Farmstay logo" className="w-20 h-20 rounded-full object-cover ring-1 ring-sand-dark" data-testid="footer-logo" />
             Dhansiri <span className="italic text-terra">farmstay</span>
           </p>
           <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-earth-muted" data-testid="footer-coordinates">

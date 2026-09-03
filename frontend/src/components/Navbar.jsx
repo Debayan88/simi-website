@@ -33,14 +33,14 @@ export const Navbar = () => {
         scrolled ? "bg-limewash/85 backdrop-blur-xl border-sand-dark" : "bg-limewash/40 backdrop-blur-md border-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-[72px] flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 sm:h-24 flex items-center justify-between">
         <button
           data-testid="nav-brand-logo"
           onClick={() => scrollToId("home")}
           className="flex items-center gap-3 group"
         >
-          <img src={LOGO} alt="Dhansiri Farmstay logo" data-testid="nav-logo-img" className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover ring-1 ring-sand-dark group-hover:ring-terra transition-all" />
-          <span className="font-serif text-xl sm:text-2xl font-semibold tracking-tight text-earth">
+          <img src={LOGO} alt="Dhansiri Farmstay logo" data-testid="nav-logo-img" className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover ring-1 ring-sand-dark group-hover:ring-terra transition-all" />
+          <span className="font-serif text-2xl sm:text-3xl font-semibold tracking-tight text-earth">
             Dhansiri <span className="italic text-terra">farmstay</span>
           </span>
         </button>

@@ -26,10 +26,18 @@ export const Hero = () => {
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const imgY = useTransform(scrollYProgress, [0, 1], [0, 160]);
   const textY = useTransform(scrollYProgress, [0, 1], [0, 80]);
+  const wmY = useTransform(scrollYProgress, [0, 1], [0, -90]);
 
   return (
     <section id="home" ref={ref} className="relative min-h-[100svh] flex items-center overflow-hidden bg-limewash">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(192,86,33,0.10),transparent_55%)]" />
+      <motion.img
+        src="https://customer-assets-lqy194kg.emergentagent.net/job_room-availability-13/artifacts/0fscfhjg_file_000000002644720891c00d296e98d019.png"
+        alt=""
+        aria-hidden="true"
+        style={{ y: wmY }}
+        className="absolute -left-24 top-[6%] w-[480px] sm:w-[620px] lg:w-[760px] opacity-[0.07] mix-blend-multiply pointer-events-none select-none"
+      />
       <DoodleScene className="absolute -bottom-6 -left-8 w-64 sm:w-80 opacity-70 pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-28 pb-16 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-6 items-center relative">
