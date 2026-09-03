@@ -8,6 +8,7 @@ import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { Marquee } from "@/components/Marquee";
 import { Manifesto } from "@/components/Manifesto";
+import { Gallery } from "@/components/Gallery";
 import { Rooms } from "@/components/Rooms";
 import { Availability } from "@/components/Availability";
 import { BookingTabs } from "@/components/BookingTabs";
@@ -23,6 +24,7 @@ const Home = () => {
         <Hero />
         <Marquee />
         <Manifesto />
+        <Gallery />
         <Rooms />
         <Availability />
         <BookingTabs />

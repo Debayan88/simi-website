@@ -29,6 +29,10 @@ User provided a concept board (Village Homestay — Terracotta & Sand, two-store
 - Booking form with live nights/total calculator; enquiry form; both persist + trigger emails
 - Verified: curl for all endpoints incl. double-booking rejection; UI booking submitted → toast → calendar blocks dates instantly; email proxy returned 202 Accepted (guest confirmations to resend test address)
 
+## Implemented (2026-09-03, v4.2)
+- Favicon + browser tab title: emblem as tab icon/apple-touch-icon, title "Dhansiri Farmstay · Kulpi, West Bengal", theme-color terracotta
+- Photo gallery strip ("Dhansiri, rising") between Manifesto and Rooms: 5 real site photos (4 new Aug 2026 shots + June construction webp), slow auto-scroll, pauses on hover, edge fades, bilingual kicker/caption
+
 ## Implemented (2026-09-03, v4.1)
 - Farmstay emblem added to the top of every guest + owner email (all 8 templates, verified 202 sends through the guardrail gate)
 - Giant faded logo watermark with slow parallax behind the hero; navbar logo enlarged (56–64px, header 80–96px), footer logo 80px

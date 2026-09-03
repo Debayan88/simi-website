@@ -67,6 +67,10 @@ export const T = {
       h2a: "Kind words from ", h2em: "the verandah.",
       sample: "Sample reviews — real guest words arriving soon.",
     },
+    gallery: {
+      kicker: "Dhansiri, rising",
+      caption: "The house by the pond · straight from the site",
+    },
     contact: {
       kicker: "Contact",
       h2a: "The kettle is ", h2em: "always on.",
@@ -139,6 +143,10 @@ export const T = {
       kicker: "অতিথি বই",
       h2a: "বারান্দা থেকে ", h2em: "ভালোবাসার কথা।",
       sample: "নমুনা রিভিউ — আসল অতিথিদের কথা শীঘ্রই আসছে।",
+    },
+    gallery: {
+      kicker: "ধানসিরি, গড়ে ওঠা",
+      caption: "পুকুরপাড়ের ঘর · সরেজমিনের ছবি",
     },
     contact: {
       kicker: "যোগাযোগ",

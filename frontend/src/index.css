@@ -65,6 +65,13 @@ html.lenis, html.lenis body {
     width: max-content;
     animation: marquee 38s linear infinite;
 }
+.gallery-track {
+    width: max-content;
+    animation: marquee 55s linear infinite;
+}
+.gallery-track:hover {
+    animation-play-state: paused;
+}
 @keyframes marquee {
     to {
         transform: translateX(-50%);
