@@ -579,7 +579,6 @@ async def startup():
     await db.users.create_index("email", unique=True)
     await db.login_attempts.create_index("identifier")
     await seed_admin()
-    await seed_reviews()
 
 
 @app.on_event("shutdown")

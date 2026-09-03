@@ -29,6 +29,10 @@ User provided a concept board (Village Homestay — Terracotta & Sand, two-store
 - Booking form with live nights/total calculator; enquiry form; both persist + trigger emails
 - Verified: curl for all endpoints incl. double-booking rejection; UI booking submitted → toast → calendar blocks dates instantly; email proxy returned 202 Accepted (guest confirmations to resend test address)
 
+## Implemented (2026-09-02, v3.1)
+- Demo data wiped: all 3 test bookings + 1 test enquiry + 4 sample reviews deleted; calendar fully fresh
+- Reviews wall hidden from landing page (no real guest words yet); GET /api/reviews and the Reviews component remain in code, DB empty — paste real words to re-enable
+
 ## Implemented (2026-09-02, v3)
 - Bengali/English toggle in navbar (full landing page i18n incl. hero, manifesto, rooms, availability, booking/enquiry forms, reviews, contact; choice persisted in localStorage). Admin dashboard stays English.
 - Guest reviews wall under rooms: GET /api/reviews, 4 seeded sample reviews (bilingual text, stars) — flagged on-page as samples until real guests leave words.

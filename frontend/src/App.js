@@ -9,7 +9,6 @@ import { Hero } from "@/components/Hero";
 import { Marquee } from "@/components/Marquee";
 import { Manifesto } from "@/components/Manifesto";
 import { Rooms } from "@/components/Rooms";
-import { Reviews } from "@/components/Reviews";
 import { Availability } from "@/components/Availability";
 import { BookingTabs } from "@/components/BookingTabs";
 import { Contact } from "@/components/Contact";
@@ -25,7 +24,6 @@ const Home = () => {
         <Marquee />
         <Manifesto />
         <Rooms />
-        <Reviews />
         <Availability />
         <BookingTabs />
         <Contact />
